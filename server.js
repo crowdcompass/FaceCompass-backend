@@ -34,6 +34,7 @@ server.get('/new', function (req, res) {
         question.choices = _.shuffle(question.choices)
       })
 
+      res.set('Content-Type', 'text/json')
       res.send(JSON.stringify(result))
     }))
   })
@@ -42,6 +43,7 @@ server.get('/new', function (req, res) {
 server.get('/score/all', function (req, res) {
   db.selectAllFromTable('scores', function (stream) {
     stream.pipe(concat(function (arr) {
+      res.set('Content-Type', 'text/json')
       res.send(JSON.stringify(arr))
     }))
   })
@@ -49,6 +51,7 @@ server.get('/score/all', function (req, res) {
 
 server.post('/score/new', function (req, res) {
   db.insertRecordIntoTable(req.body, 'scores', function (err) {
+    res.set('Content-Type', 'text/plain')
     if (err) res.send(400, String(err))
     else res.send(200)
   })
