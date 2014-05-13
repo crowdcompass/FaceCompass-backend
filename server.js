@@ -12,30 +12,23 @@ server.use(bodyParser())
 server.get('/new', function (req, res) {
   db.selectAllFromTable('people', function (stream) {
     stream.pipe(concat(function (arr) {
-      // Randomize all
+      // Grab 10 random people to use as questions
       var result = _.shuffle(arr).slice(0, 10)
 
-      // Add choices
       result.map(function (question) {
-        // Grab 3 random wrong answers
+        // Snag 3 random wrong answers
         var people = _.shuffle(arr).filter(function (person) {
           return person.name !== question.name
         }).slice(0, 3)
 
-        // Add the right answer
-        people.push(question)
-
-        // Set choices as names
-        question.choices = people.map(function (person) {
-          return person.name
-        })
+        people.push(question) // Add the right answer
+        question.choices = people.map(function (person) { return person.name }) // Set choices as names
         
         // Shuffle the choices
         question.choices = _.shuffle(question.choices)
       })
 
-      res.set('Content-Type', 'text/json')
-      res.send(JSON.stringify(result))
+      res.send(result)
     }))
   })
 })
@@ -43,19 +36,18 @@ server.get('/new', function (req, res) {
 server.get('/score/all', function (req, res) {
   db.selectAllFromTable('scores', function (stream) {
     stream.pipe(concat(function (arr) {
-      res.set('Content-Type', 'text/json')
-      res.send(JSON.stringify(arr))
+      res.send(arr)
     }))
   })
 })
 
 server.post('/score/new', function (req, res) {
   db.insertRecordIntoTable(req.body, 'scores', function (err) {
-    res.set('Content-Type', 'text/plain')
     if (err) res.send(400, String(err))
     else res.send(200)
   })
 })
 
+// Start the server
 server.listen(PORT)
 console.log('Listening on ' + PORT)
